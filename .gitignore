@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Streamlit
+.streamlit/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Database files
+.db_*/
+*.db
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
