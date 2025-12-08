@@ -5,7 +5,7 @@
 ############################################################
 # ライブラリの読み込み
 ############################################################
-from dotenv import load_dotenv
+import os
 import logging
 import streamlit as st
 import utils
@@ -21,7 +21,10 @@ st.set_page_config(
     page_title=ct.APP_NAME
 )
 
-load_dotenv()
+# ローカル環境の場合のみ.envファイルを読み込む
+if os.path.exists('.env'):
+    from dotenv import load_dotenv
+    load_dotenv()
 
 logger = logging.getLogger(ct.LOGGER_NAME)
 

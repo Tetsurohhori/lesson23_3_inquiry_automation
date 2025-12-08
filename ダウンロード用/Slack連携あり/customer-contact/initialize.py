@@ -9,7 +9,6 @@ import os
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from uuid import uuid4
-from dotenv import load_dotenv
 import streamlit as st
 import tiktoken
 from langchain_openai import ChatOpenAI
@@ -25,7 +24,10 @@ import constants as ct
 ############################################################
 # 設定関連
 ############################################################
-load_dotenv()
+# ローカル環境の場合のみ.envファイルを読み込む
+if os.path.exists('.env'):
+    from dotenv import load_dotenv
+    load_dotenv()
 
 
 ############################################################
