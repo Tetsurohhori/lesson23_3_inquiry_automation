@@ -82,18 +82,23 @@ def initialize_logger():
     """
     ログ出力の設定
     """
-    os.makedirs(ct.LOG_DIR_PATH, exist_ok=True)
-
     logger = logging.getLogger(ct.LOGGER_NAME)
 
     if logger.hasHandlers():
         return
 
-    log_handler = TimedRotatingFileHandler(
-        os.path.join(ct.LOG_DIR_PATH, ct.LOG_FILE),
-        when="D",
-        encoding="utf8"
-    )
+    # Streamlit Cloud環境ではファイル書き込みができないため、StreamHandlerを使用
+    try:
+        os.makedirs(ct.LOG_DIR_PATH, exist_ok=True)
+        log_handler = TimedRotatingFileHandler(
+            os.path.join(ct.LOG_DIR_PATH, ct.LOG_FILE),
+            when="D",
+            encoding="utf8"
+        )
+    except (OSError, PermissionError):
+        # ファイル作成に失敗した場合はコンソール出力に切り替え
+        log_handler = logging.StreamHandler()
+    
     formatter = logging.Formatter(
         f"[%(levelname)s] %(asctime)s line %(lineno)s, in %(funcName)s, session_id={st.session_state.session_id}: %(message)s"
     )
@@ -104,7 +109,7 @@ def initialize_logger():
 
 def initialize_agent_executor():
     """
-    画面読み込み時にAgent Executor（AIエージェント機能の実行を担当するオブジェクト）を作成
+    画面読み込み時にAgent Executor(AIエージェント機能の実行を担当するオブジェクト)を作成
     """
     logger = logging.getLogger(ct.LOGGER_NAME)
 
@@ -117,11 +122,13 @@ def initialize_agent_executor():
     
     st.session_state.llm = ChatOpenAI(model_name=ct.MODEL, temperature=ct.TEMPERATURE, streaming=True)
 
-    # 各Tool用のChainを作成
+    # 各Tool用のChainを作成(初回起動時にデータベースを作成)
+    logger.info("RAG Chainsの初期化を開始")
     st.session_state.customer_doc_chain = utils.create_rag_chain(ct.DB_CUSTOMER_PATH)
     st.session_state.service_doc_chain = utils.create_rag_chain(ct.DB_SERVICE_PATH)
     st.session_state.company_doc_chain = utils.create_rag_chain(ct.DB_COMPANY_PATH)
     st.session_state.rag_chain = utils.create_rag_chain(ct.DB_ALL_PATH)
+    logger.info("RAG Chainsの初期化が完了")
 
     # Web検索用のToolを設定するためのオブジェクトを用意
     search = SerpAPIWrapper()

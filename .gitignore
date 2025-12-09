@@ -20,9 +20,9 @@ build/
 logs/
 *.log
 
-# Database files
-.db_*/
-*.db
+# Database files (ChromaDBのデータは初回起動時に自動生成されるためignore)
+# .db_*/
+# *.db
 
 # macOS
 .DS_Store
