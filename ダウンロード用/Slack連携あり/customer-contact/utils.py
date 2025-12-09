@@ -29,7 +29,7 @@ from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers import EnsembleRetriever
 from docx import Document
 from langchain.output_parsers import CommaSeparatedListOutputParser
-from langchain import LLMChain
+from langchain.chains import LLMChain
 import datetime
 import constants as ct
 
@@ -37,7 +37,10 @@ import constants as ct
 ############################################################
 # 設定関連
 ############################################################
-load_dotenv()
+# ローカル環境の場合のみ.envファイルを読み込む
+if os.path.exists('.env'):
+    from dotenv import load_dotenv
+    load_dotenv()
 
 
 ############################################################
