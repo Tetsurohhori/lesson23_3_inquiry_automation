@@ -41,6 +41,13 @@ import constants as ct
 if os.path.exists('.env'):
     from dotenv import load_dotenv
     load_dotenv()
+else:
+    # Streamlit Cloud環境: st.secretsから環境変数に転送
+    import streamlit as st
+    if hasattr(st, 'secrets'):
+        for key in ['OPENAI_API_KEY', 'SERPAPI_API_KEY', 'SLACK_USER_TOKEN']:
+            if key in st.secrets:
+                os.environ[key] = st.secrets[key]
 
 
 ############################################################
