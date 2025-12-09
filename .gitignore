@@ -10,6 +10,10 @@ env/
 dist/
 build/
 
+# 日本語パスのフォルダは除外(英語パスのcustomer-contactを使用)
+ダウンロード用/
+提出用/
+
 # Streamlit
 .streamlit/
 
