@@ -5,8 +5,11 @@
 ############################################################
 # ライブラリの読み込み
 ############################################################
+import os
 from langchain_community.document_loaders import PyMuPDFLoader, Docx2txtLoader, TextLoader
 
+# スクリプトのディレクトリを基準にしたパスを取得
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ############################################################
 # 共通変数の定義
@@ -18,8 +21,8 @@ from langchain_community.document_loaders import PyMuPDFLoader, Docx2txtLoader, 
 APP_NAME = "問い合わせ対応自動化AIエージェント"
 CHAT_INPUT_HELPER_TEXT = "こちらからメッセージを送信してください。"
 APP_BOOT_MESSAGE = "アプリが起動されました。"
-USER_ICON_FILE_PATH = "./images/user_icon.jpg"
-AI_ICON_FILE_PATH = "./images/ai_icon.jpg"
+USER_ICON_FILE_PATH = os.path.join(BASE_DIR, "images/user_icon.jpg")
+AI_ICON_FILE_PATH = os.path.join(BASE_DIR, "images/ai_icon.jpg")
 WARNING_ICON = ":material/warning:"
 ERROR_ICON = ":material/error:"
 SPINNER_TEXT = "回答生成中..."
@@ -51,7 +54,7 @@ FEEDBACK_THANKS_MESSAGE = "ご回答いただき誠にありがとうござい�
 # ==========================================
 # ログ出力系
 # ==========================================
-LOG_DIR_PATH = "./logs"
+LOG_DIR_PATH = os.path.join(BASE_DIR, "logs")
 LOGGER_NAME = "ApplicationLog"
 LOG_FILE = "application.log"
 
@@ -77,7 +80,7 @@ ENCODING_KIND = "cl100k_base"
 # ==========================================
 # RAG参照用のデータソース系
 # ==========================================
-RAG_TOP_FOLDER_PATH = "./data/rag"
+RAG_TOP_FOLDER_PATH = os.path.join(BASE_DIR, "data/rag")
 
 SUPPORTED_EXTENSIONS = {
     ".pdf": PyMuPDFLoader,
@@ -85,8 +88,8 @@ SUPPORTED_EXTENSIONS = {
     ".txt": lambda path: TextLoader(path, encoding="utf-8")
 }
 
-DB_ALL_PATH = "./.db_all"
-DB_COMPANY_PATH = "./.db_company"
+DB_ALL_PATH = os.path.join(BASE_DIR, ".db_all")
+DB_COMPANY_PATH = os.path.join(BASE_DIR, ".db_company")
 
 
 # ==========================================
@@ -94,8 +97,8 @@ DB_COMPANY_PATH = "./.db_company"
 # ==========================================
 AI_AGENT_MAX_ITERATIONS = 5
 
-DB_SERVICE_PATH = "./.db_service"
-DB_CUSTOMER_PATH = "./.db_customer"
+DB_SERVICE_PATH = os.path.join(BASE_DIR, ".db_service")
+DB_CUSTOMER_PATH = os.path.join(BASE_DIR, ".db_customer")
 
 DB_NAMES = {
     DB_COMPANY_PATH: f"{RAG_TOP_FOLDER_PATH}/company",
@@ -122,8 +125,8 @@ SEARCH_WEB_INFO_TOOL_DESCRIPTION = "自社サービス「HealthX」に関する�
 # ==========================================
 # Slack連携関連
 # ==========================================
-EMPLOYEE_FILE_PATH = "./data/slack/従業員情報.csv"
-INQUIRY_HISTORY_FILE_PATH = "./data/slack/問い合わせ対応履歴.csv"
+EMPLOYEE_FILE_PATH = os.path.join(BASE_DIR, "data/slack/従業員情報.csv")
+INQUIRY_HISTORY_FILE_PATH = os.path.join(BASE_DIR, "data/slack/問い合わせ対応履歴.csv")
 CSV_ENCODING = "utf-8-sig"
 
 
