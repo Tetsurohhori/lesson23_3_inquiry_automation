@@ -113,14 +113,12 @@ if chat_message:
     # ==========================================
     logger.info({"message": chat_message})
 
-    res_box = st.empty()
     with st.chat_message("user", avatar=ct.USER_ICON_FILE_PATH):
         st.markdown(chat_message)
     
     # ==========================================
     # 2. LLMからの回答取得 or 問い合わせ処理
     # ==========================================
-    res_box = st.empty()
     try:
         if st.session_state.contact_mode == ct.CONTACT_MODE_OFF:
             with st.spinner(ct.SPINNER_TEXT):
