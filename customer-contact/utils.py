@@ -70,49 +70,53 @@ def build_error_message(message):
 def create_rag_chain(db_name):
     """
     引数として渡されたDB内を参照するRAGのChainを作成
+    メモリ節約のため、DBが存在する場合はドキュメント読み込みをスキップ
 
     Args:
         db_name: RAG化対象のデータを格納するデータベース名
     """
     logger = logging.getLogger(ct.LOGGER_NAME)
 
-    docs_all = []
-    # AIエージェント機能を使わない場合の処理
-    if db_name == ct.DB_ALL_PATH:
-        folders = os.listdir(ct.RAG_TOP_FOLDER_PATH)
-        # 「data」フォルダ直下の各フォルダ名に対して処理
-        for folder_path in folders:
-            if folder_path.startswith("."):
-                continue
-            # フォルダ内の各ファイルのデータをリストに追加
-            add_docs(f"{ct.RAG_TOP_FOLDER_PATH}/{folder_path}", docs_all)
-    # AIエージェント機能を使う場合の処理
-    else:
-        # データベース名に対応した、RAG化対象のデータ群が格納されているフォルダパスを取得
-        folder_path = ct.DB_NAMES[db_name]
-        # フォルダ内の各ファイルのデータをリストに追加
-        add_docs(folder_path, docs_all)
-
-    # OSがWindowsの場合、Unicode正規化と、cp932（Windows用の文字コード）で表現できない文字を除去
-    for doc in docs_all:
-        doc.page_content = adjust_string(doc.page_content)
-        for key in doc.metadata:
-            doc.metadata[key] = adjust_string(doc.metadata[key])
-    
-    text_splitter = CharacterTextSplitter(
-        chunk_size=ct.CHUNK_SIZE,
-        chunk_overlap=ct.CHUNK_OVERLAP,
-        separator="\n",
-    )
-    splitted_docs = text_splitter.split_documents(docs_all)
-
     embeddings = OpenAIEmbeddings()
 
-    # すでに対象のデータベースが作成済みの場合は読み込み、未作成の場合は新規作成する
+    # すでに対象のデータベースが作成済みの場合は読み込みのみ（メモリ節約）
     if os.path.isdir(db_name):
+        logger.info(f"{db_name} は既存のため、読み込みのみを実行")
         db = Chroma(persist_directory=db_name, embedding_function=embeddings)
     else:
+        # 新規作成の場合のみドキュメントを読み込む
+        logger.info(f"{db_name} を新規作成中...")
+        docs_all = []
+        # AIエージェント機能を使わない場合の処理
+        if db_name == ct.DB_ALL_PATH:
+            folders = os.listdir(ct.RAG_TOP_FOLDER_PATH)
+            # 「data」フォルダ直下の各フォルダ名に対して処理
+            for folder_path in folders:
+                if folder_path.startswith("."):
+                    continue
+                # フォルダ内の各ファイルのデータをリストに追加
+                add_docs(f"{ct.RAG_TOP_FOLDER_PATH}/{folder_path}", docs_all)
+        # AIエージェント機能を使う場合の処理
+        else:
+            # データベース名に対応した、RAG化対象のデータ群が格納されているフォルダパスを取得
+            folder_path = ct.DB_NAMES[db_name]
+            # フォルダ内の各ファイルのデータをリストに追加
+            add_docs(folder_path, docs_all)
+
+        # OSがWindowsの場合、Unicode正規化と、cp932（Windows用の文字コード）で表現できない文字を除去
+        for doc in docs_all:
+            doc.page_content = adjust_string(doc.page_content)
+            for key in doc.metadata:
+                doc.metadata[key] = adjust_string(doc.metadata[key])
+        
+        text_splitter = CharacterTextSplitter(
+            chunk_size=ct.CHUNK_SIZE,
+            chunk_overlap=ct.CHUNK_OVERLAP,
+            separator="\n",
+        )
+        splitted_docs = text_splitter.split_documents(docs_all)
         db = Chroma.from_documents(splitted_docs, embedding=embeddings, persist_directory=db_name)
+    
     retriever = db.as_retriever(search_kwargs={"k": ct.TOP_K})
 
     question_generator_template = ct.SYSTEM_PROMPT_CREATE_INDEPENDENT_TEXT
@@ -174,6 +178,12 @@ def run_company_doc_chain(param):
     Returns:
         LLMからの回答
     """
+    # 遅延読み込み：まだChainが作成されていない場合は作成
+    if st.session_state.company_doc_chain is None:
+        logger = logging.getLogger(ct.LOGGER_NAME)
+        logger.info("company_doc_chainを遅延読み込み中...")
+        st.session_state.company_doc_chain = create_rag_chain(ct.DB_COMPANY_PATH)
+    
     # 会社に関するデータ参照に特化したChainを実行してLLMからの回答取得
     ai_msg = st.session_state.company_doc_chain.invoke({"input": param, "chat_history": st.session_state.chat_history})
     # 会話履歴への追加
@@ -191,6 +201,12 @@ def run_service_doc_chain(param):
     Returns:
         LLMからの回答
     """
+    # 遅延読み込み：まだChainが作成されていない場合は作成
+    if st.session_state.service_doc_chain is None:
+        logger = logging.getLogger(ct.LOGGER_NAME)
+        logger.info("service_doc_chainを遅延読み込み中...")
+        st.session_state.service_doc_chain = create_rag_chain(ct.DB_SERVICE_PATH)
+    
     # サービスに関するデータ参照に特化したChainを実行してLLMからの回答取得
     ai_msg = st.session_state.service_doc_chain.invoke({"input": param, "chat_history": st.session_state.chat_history})
 
@@ -209,6 +225,12 @@ def run_customer_doc_chain(param):
     Returns:
         LLMからの回答
     """
+    # 遅延読み込み：まだChainが作成されていない場合は作成
+    if st.session_state.customer_doc_chain is None:
+        logger = logging.getLogger(ct.LOGGER_NAME)
+        logger.info("customer_doc_chainを遅延読み込み中...")
+        st.session_state.customer_doc_chain = create_rag_chain(ct.DB_CUSTOMER_PATH)
+    
     # 顧客とのやり取りに関するデータ参照に特化したChainを実行してLLMからの回答取得
     ai_msg = st.session_state.customer_doc_chain.invoke({"input": param, "chat_history": st.session_state.chat_history})
 

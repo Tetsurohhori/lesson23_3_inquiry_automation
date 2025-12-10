@@ -116,10 +116,11 @@ def initialize_logger():
 def initialize_agent_executor():
     """
     画面読み込み時にAgent Executor(AIエージェント機能の実行を担当するオブジェクト)を作成
+    メモリ節約のため、最小限の初期化のみ行う
     """
     logger = logging.getLogger(ct.LOGGER_NAME)
 
-    # すでにAgent Executorが作成済みの場合、後続の処理を中断
+    # すでに初期化済みの場合、後続の処理を中断
     if "agent_executor" in st.session_state:
         return
     
@@ -128,13 +129,15 @@ def initialize_agent_executor():
     
     st.session_state.llm = ChatOpenAI(model_name=ct.MODEL, temperature=ct.TEMPERATURE, streaming=True)
 
-    # 各Tool用のChainを作成(初回起動時にデータベースを作成)
-    logger.info("RAG Chainsの初期化を開始")
-    st.session_state.customer_doc_chain = utils.create_rag_chain(ct.DB_CUSTOMER_PATH)
-    st.session_state.service_doc_chain = utils.create_rag_chain(ct.DB_SERVICE_PATH)
-    st.session_state.company_doc_chain = utils.create_rag_chain(ct.DB_COMPANY_PATH)
+    # メモリ節約：初期化時は基本的なRAG Chainのみ作成
+    logger.info("基本RAG Chainの初期化を開始")
     st.session_state.rag_chain = utils.create_rag_chain(ct.DB_ALL_PATH)
-    logger.info("RAG Chainsの初期化が完了")
+    logger.info("基本RAG Chainの初期化が完了")
+    
+    # AIエージェント用のChainは遅延読み込み（最初の使用時に作成）
+    st.session_state.customer_doc_chain = None
+    st.session_state.service_doc_chain = None
+    st.session_state.company_doc_chain = None
 
     # Web検索用のToolを設定するためのオブジェクトを用意
     search = SerpAPIWrapper()
