@@ -129,8 +129,11 @@ if chat_message:
             with st.spinner(ct.SPINNER_CONTACT_TEXT):
                 result = utils.notice_slack(chat_message)
     except Exception as e:
+        import traceback
         logger.error(f"{ct.MAIN_PROCESS_ERROR_MESSAGE}\n{e}")
         st.error(utils.build_error_message(ct.MAIN_PROCESS_ERROR_MESSAGE), icon=ct.ERROR_ICON)
+        # デバッグ用：詳細なエラーメッセージを表示
+        st.code(f"エラー詳細:\n{str(e)}\n\nトレースバック:\n{traceback.format_exc()}")
         st.stop()
     
     # ==========================================
