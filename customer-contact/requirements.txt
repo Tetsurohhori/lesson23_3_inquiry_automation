@@ -116,5 +116,6 @@ uvicorn==0.32.1
 uvloop==0.21.0
 watchfiles==1.0.0
 websockets==14.1
+wikipedia==1.4.0
 yarl==1.18.3
 zstandard==0.23.0

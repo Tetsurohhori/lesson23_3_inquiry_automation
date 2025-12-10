@@ -120,6 +120,8 @@ SEARCH_CUSTOMER_COMMUNICATION_INFO_TOOL_NAME = "search_customer_communication_to
 SEARCH_CUSTOMER_COMMUNICATION_INFO_TOOL_DESCRIPTION = "顧客とのやりとりに関する情報を参照したい時に使う"
 SEARCH_WEB_INFO_TOOL_NAME = "search_web_tool"
 SEARCH_WEB_INFO_TOOL_DESCRIPTION = "自社サービス「HealthX」に関する質問で、Web検索が必要と判断した場合に使う"
+SEARCH_WIKIPEDIA_TOOL_NAME = "search_wikipedia_tool"
+SEARCH_WIKIPEDIA_TOOL_DESCRIPTION = "一般的な知識や用語、歴史的な情報などをWikipediaで調べたい時に使う。専門用語の説明や背景情報の取得に有効"
 
 
 # ==========================================

@@ -13,7 +13,7 @@ import streamlit as st
 import tiktoken
 from langchain_openai import ChatOpenAI
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
-from langchain_community.utilities import SerpAPIWrapper
+from langchain_community.utilities import SerpAPIWrapper, WikipediaAPIWrapper
 from langchain.tools import Tool
 from langchain.agents import AgentType, initialize_agent
 import utils
@@ -141,6 +141,8 @@ def initialize_agent_executor():
 
     # Web検索用のToolを設定するためのオブジェクトを用意
     search = SerpAPIWrapper()
+    # Wikipedia検索用のToolを設定するためのオブジェクトを用意
+    wikipedia = WikipediaAPIWrapper(lang="ja", top_k_results=2)
     # Agent Executorに渡すTool一覧を用意
     tools = [
         # 会社に関するデータ検索用のTool
@@ -166,6 +168,12 @@ def initialize_agent_executor():
             name = ct.SEARCH_WEB_INFO_TOOL_NAME,
             func=search.run,
             description=ct.SEARCH_WEB_INFO_TOOL_DESCRIPTION
+        ),
+        # Wikipedia検索用のTool
+        Tool(
+            name=ct.SEARCH_WIKIPEDIA_TOOL_NAME,
+            func=wikipedia.run,
+            description=ct.SEARCH_WIKIPEDIA_TOOL_DESCRIPTION
         )
     ]
 
